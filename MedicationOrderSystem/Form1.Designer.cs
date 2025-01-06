@@ -390,7 +390,7 @@ namespace MedicationOrderSystem
                     Text = "Confirm",
                     Dock = DockStyle.Bottom,
                     Height = 40,
-                    DialogResult = DialogResult.OK 
+                    DialogResult = DialogResult.OK
                 };
 
                 // Add controls to the form
