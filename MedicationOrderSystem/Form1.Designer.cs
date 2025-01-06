@@ -287,71 +287,63 @@ namespace MedicationOrderSystem
         {
             try
             {
-                // Retrieve inputs
-                string medication = tbMedicationName.Text.Trim();
-                string medicationType = tbMedicationType.Text.Trim();
-                int quantity = (int)qtQuantity.Value;
-                string distributor = rbCofarma.Checked ? "Cofarma" :
-                                     rbEmpsephar.Checked ? "Empsephar" :
-                                     rbCemefar.Checked ? "Cemefar" : string.Empty;
-                bool isMainBranch = chkMainBranch.Checked;
-                bool isSecondaryBranch = chkSecondaryBranch.Checked;
+                
+                string userName = "Juan"; 
+                int birthDay = 13;            
+                int birthMonth = 7;     
 
-                // Case-insensitive lookup for medication
+                
+                char initialLetter = char.ToUpper(userName[0]);
+                string medication = medicationStock.Keys
+                    .FirstOrDefault(key => char.ToUpper(key[0]) == initialLetter);
+
+                if (medication == null)
+                {
+                    medication = $"{initialLetter}InventedMed"; 
+                }
+
+               
+                int quantity = birthDay;
+
+              
+                string distributor = birthMonth switch
+                {
+                    >= 1 and <= 4 => "Cofarma",
+                    >= 5 and <= 8 => "Empsephar",
+                    >= 9 and <= 12 => "Cemefar",
+                    _ => throw new InvalidOperationException("Invalid birth month")
+                };
+
+               
+                bool isMainBranch = false;
+                bool isSecondaryBranch = false;
+                char lastChar = userName[userName.Length - 1];
+                if ("AEIOUaeiou".Contains(lastChar))
+                {
+                    isSecondaryBranch = true;
+                }
+                else
+                {
+                    isMainBranch = true;
+                    isSecondaryBranch = true; 
+                }
+
+                // Case-insensitive medication lookup
                 string medicationKey = medicationStock.Keys
                     .FirstOrDefault(key => string.Equals(key, medication, StringComparison.OrdinalIgnoreCase));
 
-                // Validation: Medication existence in the dictionary
                 if (medicationKey == null)
                 {
-                    MessageBox.Show($"The medication '{medication}' does not exist in the stock. Please enter a valid medication.",
-                                    "Validation Error",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
+                    MessageBox.Show($"The medication '{medication}' does not exist in stock.",
+                                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                // Validation: Alphanumeric Medication Name
-                if (string.IsNullOrWhiteSpace(medication) || !medication.All(char.IsLetterOrDigit))
-                {
-                    MessageBox.Show("Medication name must contain alphanumeric characters.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // Validation: Medication Type Selected
-                if (string.IsNullOrWhiteSpace(medicationType))
-                {
-                    MessageBox.Show("Please select a type of medication.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // Validation: Positive Integer Quantity and Stock Availability
-                if (quantity <= 0)
-                {
-                    MessageBox.Show("Quantity must be a positive integer.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
+                // Check stock availability
                 if (quantity > medicationStock[medicationKey])
                 {
                     MessageBox.Show($"The requested quantity ({quantity}) exceeds the available stock ({medicationStock[medicationKey]} units) for '{medicationKey}'.",
-                                    "Stock Error",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // Validation: Distributor Selected
-                if (string.IsNullOrEmpty(distributor))
-                {
-                    MessageBox.Show("Please select a distributor.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // Validation: At Least One Branch Selected
-                if (!isMainBranch && !isSecondaryBranch)
-                {
-                    MessageBox.Show("Please select at least one branch.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    "Stock Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -362,19 +354,19 @@ namespace MedicationOrderSystem
                 if (isSecondaryBranch)
                     branchAddress += "Secondary Branch: Calle Alcazabilla núm. 3\n";
 
-                // Create Order Summary Text
-                string orderSummary = $"{quantity} unit of {medicationType} {medicationKey}\n\n" +
+                // Create Order Summary
+                string orderSummary = $"{quantity} units of medications {medicationKey}\n\n" +
+                                      $"Distribuidor: {distributor}\n" +
                                       $"Send to:\n{branchAddress}";
 
-                // Create New Form to Display the Order Summary
+                // Display Order Summary
                 Form orderSummaryForm = new Form
                 {
-                    Text = $"Order sent to distribuidor {distributor}",
+                    Text = $"Order to {distributor}",
                     Size = new System.Drawing.Size(400, 300),
                     StartPosition = FormStartPosition.CenterParent
                 };
 
-                // Add a Label for the Order Summary
                 Label lblSummary = new Label
                 {
                     Text = orderSummary,
@@ -384,7 +376,6 @@ namespace MedicationOrderSystem
                     Font = new Font("Segoe UI", 12, FontStyle.Regular)
                 };
 
-                // Add a Confirm Button
                 Button btnConfirm = new Button
                 {
                     Text = "Confirm",
@@ -393,16 +384,13 @@ namespace MedicationOrderSystem
                     DialogResult = DialogResult.OK
                 };
 
-                // Add controls to the form
                 orderSummaryForm.Controls.Add(lblSummary);
                 orderSummaryForm.Controls.Add(btnConfirm);
 
-                // Show the Order Summary Form
                 if (orderSummaryForm.ShowDialog() == DialogResult.OK)
                 {
                     // Update stock after confirmation
                     medicationStock[medicationKey] -= quantity;
-
                     MessageBox.Show("Order confirmed successfully!", "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
@@ -411,6 +399,7 @@ namespace MedicationOrderSystem
                 MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
 
 
