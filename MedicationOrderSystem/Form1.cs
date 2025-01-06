@@ -55,16 +55,6 @@ namespace MedicationOrderSystem
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            // Placeholder for initialization logic
-        }
-
-        private void rbEmpsephar_CheckedChanged(object sender, EventArgs e)
-        {
-            // Check box logic
-        }
-
 
         private void button3_Click(object sender, EventArgs e)
         {
