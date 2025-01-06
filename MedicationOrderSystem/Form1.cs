@@ -1,13 +1,13 @@
-using System;
-using System.Windows.Forms;
-using System.Collections.Generic;
-using System.Linq;
-
-
 namespace MedicationOrderSystem
 {
     public partial class Form1 : Form
     {
+        //private TextBox tbUserName;
+        private DateTimePicker dtpBirthDate;
+        private Label lblMedicationStatus;
+
+
+
         private readonly Dictionary<string, int> medicationStock = new Dictionary<string, int>
         {
             {"Paracetamol", 50 },
@@ -29,7 +29,6 @@ namespace MedicationOrderSystem
         private void txtMedication_TextChanged(object sender, EventArgs e)
         {
             string entredMedication = tbMedicationName.Text.Trim();
-
 
             if (string.IsNullOrWhiteSpace(entredMedication))
             {
@@ -91,17 +90,44 @@ namespace MedicationOrderSystem
             }
         }
 
-
-        private Label lblMedicationStatus;
-
-        private void qtQuantity_ValueChanged(object sender, EventArgs e)
+        private void tbMedicationType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            try
+            {
+                // Step 1: Get the selected medication type
+                string medicationType = tbMedicationType.SelectedItem?.ToString() ?? string.Empty;
 
+                if (string.IsNullOrWhiteSpace(medicationType))
+                {
+                    tbMedicationName.PlaceholderText = "Select a medication type";
+                    return;
+                }
+
+                // Step 2: Determine the first letter of the medication type
+                char initialLetter = char.ToUpper(medicationType[0]);
+
+                // Step 3: Find a medication that starts with the same letter
+                string medication = medicationStock.Keys.FirstOrDefault(key => string.Equals(key[0].ToString(), initialLetter.ToString(), StringComparison.OrdinalIgnoreCase)) ?? $"{initialLetter}InventedMed";
+                // Step 4: If no match exists, invent a medication name
+                if (medication == null)
+                {
+                    medication = $"{initialLetter}InventedMed"; // Placeholder medication
+                }
+
+                // Step 5: Set as placeholder text in the Medication Name field
+                tbMedicationName.PlaceholderText = medication;
+
+                // Optional: Logically prefill the text box if required (uncomment if needed)
+                // tbMedicationName.Text = medication;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        private void Form1_Load_1(object sender, EventArgs e)
-        {
-
-        }
     }
 }
+
+
+
